@@ -45,6 +45,45 @@ def ansible(subcommand, **kwargs):
 
 
 @subcommand_of("ansible")
+def approve_workflow(dispatcher, workflow_id):
+    """Approve an Ansible Tower / AWX workflow by ID."""
+
+    tower = Tower(origin=Origin(dispatcher.platform_name, dispatcher.platform_slug))
+
+    if not workflow_id:
+        data = tower.get_tower_workflow_approvals("pending")
+        dispatcher.prompt_from_menu(
+            "ansible approve-workflow",
+            "Select workflow ID",
+            [(str(entry["id"]), str(entry["id"])) for entry in data],
+        )
+        return False
+
+    success = tower.approve_tower_workflow(workflow_id)
+    dispatcher.send_blocks(
+        [
+            *dispatcher.command_response_header(
+                "ansible",
+                "approve-workflow",
+                [("Workflow ID", workflow_id)],
+                "Ansible Tower / AWX Approve Workflow",
+                ansible_logo(dispatcher),
+            ),
+            dispatcher.markdown_block(
+                f"{TOWER_URI}/#/#/workflow_approvals/{workflow_id}/details",
+            ),
+        ]
+    )
+
+    if success:
+        dispatcher.send_markdown(f"Approved workflow {workflow_id}.")
+    else:
+        dispatcher.send_markdown(f"Approval of workflow {workflow_id} failed.")
+
+    return True
+
+
+@subcommand_of("ansible")
 def get_dashboard(dispatcher):
     """Get Ansible Tower / AWX dashboard status."""
     # TODO: the dashboard/ API endpoint says it's deprecated and will be removed
@@ -226,6 +265,7 @@ def get_projects(dispatcher):
 
     return True
 
+
 @subcommand_of("ansible")
 def get_workflow_approvals(dispatcher, status):
     """List Ansible Tower/AWX workflow approvals."""
@@ -279,6 +319,7 @@ def get_workflow_approvals(dispatcher, status):
     )
 
     return True
+
 
 @subcommand_of("ansible")
 def run_job_template(dispatcher, template_name):
