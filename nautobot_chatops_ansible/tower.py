@@ -200,3 +200,18 @@ class Tower:  # pylint: disable=too-many-function-args
         """Get job template listing from Ansible."""
         response = self._get_tower("job_templates/")
         return response["results"]
+
+    def get_tower_workflow_approvals(self, status=None):
+        """Get Tower workflow approvals.
+
+        Args:
+            status (str): Status to use for filtering
+
+        Returns:
+            dict: Workflow approval results
+        """
+        if status:
+            response = self._get_tower(f"workflow_approvals/?order=-created&status={status}")
+        else:
+            response = self._get_tower("workflow_approvals/?order=-created")
+        return response["results"]

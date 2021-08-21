@@ -250,3 +250,30 @@ def run_job_template(dispatcher, template_name):
     )
     dispatcher.send_markdown(f"{TOWER_URI}/#/jobs/playbook/{job_id}")
     return True
+
+@subcommand_of("ansible")
+def get_workflow_approvals(dispatcher):
+    """List pending workflow approvals."""
+    tower = Tower(origin=Origin(dispatcher.platform_name, dispatcher.platform_slug))
+
+    workflow_approvals = tower.get_tower_workflow_approvals()
+
+    dispatcher.send_blocks(
+        [
+            *dispatcher.command_response_header(
+                "ansible",
+                "get-workflow-approvals",
+                [],
+                "Ansible Tower / AWX workflow approval list",
+                ansible_logo(dispatcher),
+            ),
+            dispatcher.markdown_block(f"{TOWER_URI}/#/workflow_approvals"),
+        ]
+    )
+
+    dispatcher.send_large_table(
+        ["ID", "Name", "Job", "Status", "Timed Out"],
+        [(entry["id"], entry["name"], entry["summary_fields"].get("source_workflow_job", {}).get("name", "Deleted"), entry["status"], entry["timed_out"]) for entry in workflow_approvals],
+    )
+
+    return True
