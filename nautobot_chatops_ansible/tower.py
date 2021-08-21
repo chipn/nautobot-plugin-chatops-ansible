@@ -201,7 +201,7 @@ class Tower:  # pylint: disable=too-many-function-args
         response = self._get_tower("job_templates/")
         return response["results"]
 
-    def get_tower_workflow_approvals(self, status=None):
+    def get_tower_workflow_approvals(self, status):
         """Get Tower workflow approvals.
 
         Args:
@@ -210,8 +210,8 @@ class Tower:  # pylint: disable=too-many-function-args
         Returns:
             dict: Workflow approval results
         """
-        if status:
-            response = self._get_tower(f"workflow_approvals/?order=-created&status={status}")
-        else:
+        if status == "all":
             response = self._get_tower("workflow_approvals/?order=-created")
+        else:
+            response = self._get_tower(f"workflow_approvals/?order=-created&status={status}")
         return response["results"]

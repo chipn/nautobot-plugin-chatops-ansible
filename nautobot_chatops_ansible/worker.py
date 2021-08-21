@@ -251,12 +251,31 @@ def run_job_template(dispatcher, template_name):
     dispatcher.send_markdown(f"{TOWER_URI}/#/jobs/playbook/{job_id}")
     return True
 
+
 @subcommand_of("ansible")
-def get_workflow_approvals(dispatcher):
+def get_workflow_approvals(dispatcher, status):
     """List pending workflow approvals."""
     tower = Tower(origin=Origin(dispatcher.platform_name, dispatcher.platform_slug))
 
-    workflow_approvals = tower.get_tower_workflow_approvals()
+    if not status:
+        dispatcher.prompt_from_menu(
+            "ansible get-workflow-approvals",
+            "Which status do you want to include?",
+            [
+                ("New", "new"),
+                ("Pending", "pending"),
+                ("Waiting", "waiting"),
+                ("Running", "running"),
+                ("Successful", "successful"),
+                ("Failed", "failed"),
+                ("Error", "error"),
+                ("Canceled", "canceled"),
+                ("All", "all"),
+            ],
+            default=("All", "all"),
+        )
+        return False
+    workflow_approvals = tower.get_tower_workflow_approvals(status)
 
     dispatcher.send_blocks(
         [
@@ -273,7 +292,16 @@ def get_workflow_approvals(dispatcher):
 
     dispatcher.send_large_table(
         ["ID", "Name", "Job", "Status", "Timed Out"],
-        [(entry["id"], entry["name"], entry["summary_fields"].get("source_workflow_job", {}).get("name", "Deleted"), entry["status"], entry["timed_out"]) for entry in workflow_approvals],
+        [
+            (
+                entry["id"],
+                entry["name"],
+                entry["summary_fields"].get("source_workflow_job", {}).get("name", "Deleted"),
+                entry["status"],
+                entry["timed_out"],
+            )
+            for entry in workflow_approvals
+        ],
     )
 
     return True
