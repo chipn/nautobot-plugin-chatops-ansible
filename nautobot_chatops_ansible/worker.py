@@ -226,32 +226,6 @@ def get_projects(dispatcher):
 
     return True
 
-
-@subcommand_of("ansible")
-def run_job_template(dispatcher, template_name):
-    """Execute an Ansible Tower / AWX job template."""
-    tower = Tower(origin=Origin(dispatcher.platform_name, dispatcher.platform_slug))
-
-    if not template_name:
-        return prompt_for_job_template(dispatcher, "ansible run-job-template")
-
-    data = tower.get_tower_template(template_name=template_name)
-    template = data["results"][0] if data["results"] else {}
-    if not template:
-        dispatcher.send_error("No such job template found")
-        return prompt_for_job_template(dispatcher, "ansible run-job-template")
-
-    # TODO: parse any additional args into extra_vars, perhaps as "keyword=value" pairs?
-
-    response = tower.run_tower_template(dispatcher=dispatcher, template_name=template_name)
-    job_id = response["id"]
-    dispatcher.send_markdown(
-        f"Hey {dispatcher.user_mention()}, Job template {template_name} has been submitted, job ID is {job_id}"
-    )
-    dispatcher.send_markdown(f"{TOWER_URI}/#/jobs/playbook/{job_id}")
-    return True
-
-
 @subcommand_of("ansible")
 def get_workflow_approvals(dispatcher, status):
     """List Ansible Tower/AWX workflow approvals."""
@@ -304,4 +278,28 @@ def get_workflow_approvals(dispatcher, status):
         ],
     )
 
+    return True
+
+@subcommand_of("ansible")
+def run_job_template(dispatcher, template_name):
+    """Execute an Ansible Tower / AWX job template."""
+    tower = Tower(origin=Origin(dispatcher.platform_name, dispatcher.platform_slug))
+
+    if not template_name:
+        return prompt_for_job_template(dispatcher, "ansible run-job-template")
+
+    data = tower.get_tower_template(template_name=template_name)
+    template = data["results"][0] if data["results"] else {}
+    if not template:
+        dispatcher.send_error("No such job template found")
+        return prompt_for_job_template(dispatcher, "ansible run-job-template")
+
+    # TODO: parse any additional args into extra_vars, perhaps as "keyword=value" pairs?
+
+    response = tower.run_tower_template(dispatcher=dispatcher, template_name=template_name)
+    job_id = response["id"]
+    dispatcher.send_markdown(
+        f"Hey {dispatcher.user_mention()}, Job template {template_name} has been submitted, job ID is {job_id}"
+    )
+    dispatcher.send_markdown(f"{TOWER_URI}/#/jobs/playbook/{job_id}")
     return True
