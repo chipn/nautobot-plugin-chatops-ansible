@@ -230,3 +230,18 @@ class Tower:  # pylint: disable=too-many-function-args
         if response.status_code == 204:
             return True
         return False
+
+    def deny_tower_workflow(self, workflow_id):
+        """Deny a workflow in Tower.
+
+        Args:
+            workflow_id (str): Workflow approval ID
+
+        Returns:
+            boolean: True for success, False for failure
+        """
+        api_path = f"workflow_approvals/{workflow_id}/deny/"
+        response = requests.post(f"{self.uri}/api/v2/{api_path}", auth=(self.username, self.password))
+        if response.status_code == 204:
+            return True
+        return False

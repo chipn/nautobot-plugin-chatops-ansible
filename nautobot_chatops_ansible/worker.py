@@ -82,6 +82,43 @@ def approve_workflow(dispatcher, workflow_id):
 
     return True
 
+@subcommand_of("ansible")
+def deny_workflow(dispatcher, workflow_id):
+    """Deny an Ansible Tower / AWX workflow by ID."""
+
+    tower = Tower(origin=Origin(dispatcher.platform_name, dispatcher.platform_slug))
+
+    if not workflow_id:
+        data = tower.get_tower_workflow_approvals("pending")
+        dispatcher.prompt_from_menu(
+            "ansible deny-workflow",
+            "Select workflow ID",
+            [(str(entry["id"]), str(entry["id"])) for entry in data],
+        )
+        return False
+
+    success = tower.deny_tower_workflow(workflow_id)
+    dispatcher.send_blocks(
+        [
+            *dispatcher.command_response_header(
+                "ansible",
+                "deny-workflow",
+                [("Workflow ID", workflow_id)],
+                "Ansible Tower / AWX Approve Workflow",
+                ansible_logo(dispatcher),
+            ),
+            dispatcher.markdown_block(
+                f"{TOWER_URI}/#/#/workflow_approvals/{workflow_id}/details",
+            ),
+        ]
+    )
+
+    if success:
+        dispatcher.send_markdown(f"Denied workflow *{workflow_id}*.")
+    else:
+        dispatcher.send_markdown(f"Denying workflow *{workflow_id}* failed.")
+
+    return True
 
 @subcommand_of("ansible")
 def get_dashboard(dispatcher):
