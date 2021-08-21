@@ -254,7 +254,7 @@ def run_job_template(dispatcher, template_name):
 
 @subcommand_of("ansible")
 def get_workflow_approvals(dispatcher, status):
-    """List pending workflow approvals."""
+    """List Ansible Tower/AWX workflow approvals."""
     tower = Tower(origin=Origin(dispatcher.platform_name, dispatcher.platform_slug))
 
     if not status:
