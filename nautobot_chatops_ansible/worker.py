@@ -70,7 +70,7 @@ def approve_workflow(dispatcher, workflow_id):
                 ansible_logo(dispatcher),
             ),
             dispatcher.markdown_block(
-                f"{TOWER_URI}/#/#/workflow_approvals/{workflow_id}/details",
+                f"{TOWER_URI}/#/workflow_approvals/{workflow_id}/details",
             ),
         ]
     )
@@ -108,7 +108,7 @@ def deny_workflow(dispatcher, workflow_id):
                 ansible_logo(dispatcher),
             ),
             dispatcher.markdown_block(
-                f"{TOWER_URI}/#/#/workflow_approvals/{workflow_id}/details",
+                f"{TOWER_URI}/#/workflow_approvals/{workflow_id}/details",
             ),
         ]
     )
