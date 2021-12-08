@@ -52,6 +52,10 @@ def approve_workflow(dispatcher, workflow_id):
 
     if not workflow_id:
         data = tower.get_tower_workflow_approvals("pending")
+        if not data:
+            dispatcher.send_markdown("No pending workflow approvals.")
+            return False
+
         dispatcher.prompt_from_menu(
             "ansible approve-workflow",
             "Select workflow ID",
